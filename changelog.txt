@@ -1,0 +1,47 @@
+1.1
+- Added 'Original recruitlist' pool type.
+- Fixed errors when the era specifies invalid recruits unit ids.
+- Removed 'Fog Clearer' from fallback unit list.
+- Some dialogs cleanups in case of a low unit number.
+1.0.1
+- Fixed 'PYR No Preperation Turn was not loaded correctly' warning appearing on wesnoth 1.12.x
+- Fixed error when finding a unit with an invalid race.
+- Added notification if unit pool 'all' is used.
+1.0
+- Fixed UI bugs for people who don't have the addon installed
+- Fixed warning about trying to read the pbl file
+- Added an option to only show the unit selection in the first scenario.
+- more entropy for sync choice workaround
+0.4.2
+- add [feedback] to pbl file
+- add a message to show for which side we are currently waiting.
+0.4.1
+- Fix a problem with units with no advances_to attribute.
+- Improved Confirm dialog.
+- new "Fill Random" button on the unit selection gui.
+- new "Remove All" button on the unit selection gui.
+- clean up the global lua namespace
+- clean up some lua files.
+- added a comment about players having to wait during the start event while waiting for other players decisions in the descrition.
+- Special thanks to zookeeper for being the first one giving feedback on this addon.
+0.4
+- now works with version 1.11.13+ too
+- fixed a typo in the name
+0.3.2
+- fix bug introduced in 0.3.1 with gold limit
+0.3.1
+- fix a visual bugs in the unit selection dialog
+0.3:
+- Make random ai rectuilist optional
+- fix unit pool "All in game" Option.
+- fix textdomain incompability
+- fixed tabs in descriptions.
+- allow to rectuit leader only units (Lieutenant) in "All in era" option
+- improve LUAREQUIRE macro.
+- fix ai random unit choose with gold limit
+0.2.2:
+- Small graphical fix
+0.2.1:
+- Removing a debug message
+- Addin informatio how to give feedback.
+
