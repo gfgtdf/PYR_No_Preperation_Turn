@@ -35,7 +35,7 @@ function unit_selection_wrapper.let_player_choose_sides()
 
 	local sided_numbers = {}
 	-- NOTE: We do this even for ai sides, because there are known bugs where a side appeared as ai for one side but not for another.
-	for i,v in ipairs wesnoth.sides do
+	for i,v in ipairs(wesnoth.sides) do
 		table.insert(sided_numbers, v.side)
 	end	
 	local result = wesnoth.synchronize_choices(
