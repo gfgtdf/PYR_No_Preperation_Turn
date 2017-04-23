@@ -1,6 +1,7 @@
 --<<
-local _ = _textdomain_pyr_npt
+
 local myhelper = {}
+
 function myhelper.tablegroupby(t, selector)
     local r1 = {}
 	for key,value in pairs(t) do
@@ -20,16 +21,6 @@ function myhelper.tablemax(t, fn)
 		end
 	end
     return maxkey, maxvalue
-end
-
-function myhelper.arraytablefilter(t, fn)
-    local r = {}
-	for key, value in ipairs(t) do
-		if fn(value) then
-			table.insert(t, value)
-		end
-	end
-	return r
 end
 
 function myhelper.tablecontains(t, elem)
@@ -218,135 +209,12 @@ myhelper.deepcopy = function (orig)
 	return copy
 end
 
---unlike get_child this creates a child if it cannot find it.
-myhelper.get_or_create_child = function(cfg, name)
-	local r = helper.get_child(cfg, name)
-	if r ~= nil then
-		return r
-	else
-		r = {}
-		table.insert(cfg,{name,r})
-		return r
-	end
-end
---unlike child_range this give also the index of the tag
-myhelper.child_range_ex = function (cfg, tag)
-	local function f(d, i)
-		local c
-		repeat
-			i = i + 1
-			c = cfg[i]
-			if not c then return end
-		until c[1] == tag
-		return i, c[2]
-	end
-	return f, 0
-end
-
-function myhelper.child_range_multiple_tags(cfg, tag_set)
-	local function f(s)
-		local c
-		repeat
-			local i = s.i
-			c = cfg[i]
-			if not c then return end
-			s.i = i + 1
-		until tag_set[c[1]] ~= nil
-		return c[2]
-	end
-	return f, { i = 1 }
-end
-
 myhelper.trim = function(s)
   return s:match'^%s*(.*%S)' or ''
 end
--- this method is for iterating over 2 enumerations syncroinous, 
--- use it like "for k,v in  merge_iterators({pairs(..)},{pairs(..)}) do" then k,v are arrays of len 2 containing the original k v
-myhelper.merge_iterators = function(it1, it2)
-	local function f(d, i)
-		i1 ,v1 = it1[1](d[1], i[1])
-		i2 ,v2 = it2[1](d[2], i[2])
-		if(i1 ~= nil or i2 ~= nil) then
-			return {i1 ,i2}, {v1 ,v2}
-		end
-	end
-	return f, {it1[2], it2[2]}, {it1[3], it2[3]}
-end
 
---
-myhelper.remove_from_array = function(arr, f_filter)
-	local index = 1
-	while index <= #arr do
-		if(f_filter(arr[index])) then
-			table.remove(arr, index)
-		else
-			index = index + 1
-		end
-	end
-end
--- removes ONE subtag with the given tagname of the wml object returns weather somthing was removed,
-myhelper.remove_subtag = function(cfg, name)
-	for k,v in pairs(cfg) do
-		if(type(k) == "number") and (v[1] == name) then
-			table.remove(cfg, k)
-			return true
-		end
-	end
-	return false
-end
+myhelper.thex_png = "misc/blank-hex.png"
 
-
-myhelper.random_number = function(mi, ma)
-	-- min, max are keyword according to notepad++s syntax highlighting
-	if not ma then mi, ma = 1, mi end
-	wesnoth.fire("set_variable", { name = "LUA_random", rand = string.format("%d..%d", mi, ma) })
-	local res = wesnoth.get_variable "LUA_random"
-	wesnoth.set_variable "LUA_random"
-	return res
-end
-
-myhelper.string_starts = function(String, Start)
-   return string.sub(String,1,string.len(Start))==Start
-end
-
-if wesnoth.have_file( "~add-ons/PYR_No_Preperation_Turn/images/tpixel.png") then
-	myhelper.tpixel_png = "tpixel.png"
-	myhelper.thex_png = "misc/blank-hex.png"
-else
-	myhelper.tpixel_png = "misc/blank-hex.png~SCALE(1,1)"
-	myhelper.thex_png = "misc/blank-hex.png"
-end
 return myhelper
 
-
-
-
 -->>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

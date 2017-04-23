@@ -5,7 +5,7 @@ local V = helper.set_wml_var_metatable {}
 
 unit_selection_wrapper.ai_chose = function(side)
 
-	if wesnoth.get_variable("pyr_npt_no_ai") then
+	if V.pyr_npt_no_ai then
 		return wesnoth.sides[side].recruit
 	end
 	--choose random types.
