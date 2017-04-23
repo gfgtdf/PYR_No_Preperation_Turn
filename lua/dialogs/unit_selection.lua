@@ -4,28 +4,28 @@ local _ = _textdomain_pyr_npt
 local function GUI_FORCE_WIDGET_MINIMUM_SIZE(w,h, content)
 	return T.stacked_widget {
 		definition = "default",
-			T.layer {
-				T.row {
-					T.column {
-						T.spacer {
-							definition = "default",
-							width = w,
-							height = h
-						}
+		T.layer {
+			T.row {
+				T.column {
+					T.spacer {
+						definition = "default",
+						width = w,
+						height = h
 					}
-				} 
-			},
-			T.layer {
-				T.row {
+				}
+			} 
+		},
+		T.layer {
+			T.row {
+				grow_factor = 1,
+				T.column {
 					grow_factor = 1,
-					T.column {
-						grow_factor = 1,
-						horizontal_grow = "true",
-						vertical_grow = "true",
-						content
-					}
-				} 
-			}
+					horizontal_grow = "true",
+					vertical_grow = "true",
+					content
+				}
+			} 
+		}
 	}
 end
 local unit_list = T.listbox {
@@ -103,7 +103,7 @@ local chosen_unit_list = T.listbox {
 
 local chosen_unit_panel = T.grid{ 
 	T.row { 
-			grow_factor = 0,
+		grow_factor = 0,
 		T.column {
 			border = "all",
 			border_size = 5,
@@ -114,7 +114,7 @@ local chosen_unit_panel = T.grid{
 		}
 	},
 	T.row {
-			grow_factor = 1,
+		grow_factor = 1,
 		T.column {
 			horizontal_alignment = "left",
 			border_size = 0,
@@ -124,7 +124,7 @@ local chosen_unit_panel = T.grid{
 		}
 	},
 	T.row {
-			grow_factor = 0,
+		grow_factor = 0,
 		T.column {
 			horizontal_alignment = "left",
 			border = "left, right",
@@ -137,7 +137,7 @@ local chosen_unit_panel = T.grid{
 		}
 	},
 	T.row {
-			grow_factor = 0,
+		grow_factor = 0,
 		T.column {
 			horizontal_alignment = "left",
 			border = "left, right, bottom",
@@ -182,101 +182,101 @@ local race_list = T.listbox {
 
 
 local details_panel_pages =   T.grid {
-		T.row {
-			T.column {
-				border = "all",
-				border_size = 5,
-				horizontal_grow = true,
-				vertical_grow = true,
-				T.unit_preview_pane {	
-					definition = "default",
-					id = "unit_preview"
-				}
+	T.row {
+		T.column {
+			border = "all",
+			border_size = 5,
+			horizontal_grow = true,
+			vertical_grow = true,
+			T.unit_preview_pane {	
+				definition = "default",
+				id = "unit_preview"
 			}
-		},
-		T.row {
-			T.column {
-				border = "all",
-				border_size = 5,
-				horizontal_alignment = "left",
-				vertical_alignment = "top",
-				T.grid {
-					T.row {
-						T.column {
-							border = "all",
-							border_size = 5,
-							horizontal_alignment = "left",
-							vertical_alignment = "top",
-							T.button {
-								id = "add_button",
-								label = _"Add"
-							},
-						},
-						T.column {
-							border = "all",
-							border_size = 5,
-							horizontal_alignment = "left",
-							vertical_alignment = "top",
-							T.button {
-								id = "remove_button",
-								label = _"Remove"
-							},
+		}
+	},
+	T.row {
+		T.column {
+			border = "all",
+			border_size = 5,
+			horizontal_alignment = "left",
+			vertical_alignment = "top",
+			T.grid {
+				T.row {
+					T.column {
+						border = "all",
+						border_size = 5,
+						horizontal_alignment = "left",
+						vertical_alignment = "top",
+						T.button {
+							id = "add_button",
+							label = _"Add"
 						},
 					},
-					T.row {
-						T.column {
-							border = "all",
-							border_size = 5,
-							horizontal_alignment = "left",
-							vertical_alignment = "top",
-							T.button {
-								id = "random_choice_button",
-								label = _"Fill Random"
-							},
-						},
-						T.column {
-							border = "all",
-							border_size = 5,
-							horizontal_alignment = "left",
-							vertical_alignment = "top",
-							T.button {
-								id = "remove_all_button",
-								label = _"Remove all"
-							},
+					T.column {
+						border = "all",
+						border_size = 5,
+						horizontal_alignment = "left",
+						vertical_alignment = "top",
+						T.button {
+							id = "remove_button",
+							label = _"Remove"
 						},
 					},
-				}
+				},
+				T.row {
+					T.column {
+						border = "all",
+						border_size = 5,
+						horizontal_alignment = "left",
+						vertical_alignment = "top",
+						T.button {
+							id = "random_choice_button",
+							label = _"Fill Random"
+						},
+					},
+					T.column {
+						border = "all",
+						border_size = 5,
+						horizontal_alignment = "left",
+						vertical_alignment = "top",
+						T.button {
+							id = "remove_all_button",
+							label = _"Remove all"
+						},
+					},
+				},
 			}
-		},
-		T.row {
+		}
+	},
+	T.row {
+		vertical_alignment = "bottom",
+		T.column {
+			border = "all",
+			border_size = 5,
 			vertical_alignment = "bottom",
-			T.column {
-				border = "all",
-				border_size = 5,
-				vertical_alignment = "bottom",
-				horizontal_grow = true,
-				T.button {
-					definition = "large",
-					id = "ok",
-					label = _"Ok"
-				}
+			horizontal_grow = true,
+			T.button {
+				definition = "large",
+				id = "ok",
+				label = _"Ok"
 			}
-		},
+		}
+	},
 }
 
 
 local main_window = {
 	maximum_height = 700,
 	maximum_width = 900,
-
+	
 	T.helptip { id = "tooltip" }, -- mandatory field
 	T.tooltip { id = "tooltip" }, -- mandatory field
-
+	
 	T.linked_group { id = "pyr_image", fixed_width = true },
 	T.linked_group { id = "pyr_image_chosen", fixed_width = true },
 	T.linked_group { id = "pyr_lg_name", fixed_width = true },
 	T.linked_group { id = "pyr_lg_race_name", fixed_width = true },
-
+	
 	T.grid {
 		T.row {
 			grow_factor = 1,

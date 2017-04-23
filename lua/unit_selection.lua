@@ -310,8 +310,8 @@ unit_selection.do_selection = function(side)
 	local update_chosen_units = function()
 		local index = 1
 		for index2,value in ipairs(chosen_units) do
-				wesnoth.set_dialog_value((unit_types[value].image or "") .."~SCALE(72,72)", "chosen_unit_list", index2, "list_image2")
-				index = index2 + 1
+			wesnoth.set_dialog_value((unit_types[value].image or "") .."~SCALE(72,72)", "chosen_unit_list", index2, "list_image2")
+			index = index2 + 1
 		end
 		while index <= max_selectalbe_units_l do
 			wesnoth.set_dialog_value(pyr_npt_helper.thex_png , "chosen_unit_list", index, "list_image2")
