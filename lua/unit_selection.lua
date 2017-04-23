@@ -13,21 +13,22 @@ unit_selection.max_selectalbe_units_gold_limit = function()
 	end
 end
 
--- returns a strign with teh message if invlid othewrwise true
+-- @ret1 boolean
+-- @ret2 a strign with the message if invlid othewrwise nil
 function unit_selection.is_valid_recuitlist(unitidlist)
 	for k,v in pairs(unitidlist) do
 		if(wesnoth.unit_types[v] == nil) then
 			---wesnoh.message("found invalid unit id:" .. tostring(v))
-			return "found invalid unit id:" .. tostring(v)
+			return false, "found invalid unit id:" .. tostring(v)
 		end
 	end
 	if(#unitidlist > unit_selection.max_selectalbe_units()) then
 		--wesnoth.message("found too many units in recruitlist")
-		return "found too many units in recruitlist"
+		return false, "found too many units in recruitlist"
 	end
 	if(pyr_npt_helper.tablereduce(unitidlist, function(a,b) return a + wesnoth.unit_types[b].cost end, 0) > unit_selection.max_selectalbe_units_gold_limit()) then
 		--wesnoth.message("found too expensive units in recruitlist")
-		return "found too expensive units in recruitlist"
+		return false, "found too expensive units in recruitlist"
 	end
 		
 	return true
@@ -334,7 +335,7 @@ unit_selection.do_selection = function(side)
 	local on_add_button = function()
 		if pyr_npt_helper.tablecontains(chosen_units, current_selected_unit_index) then return end
 		table.insert(chosen_units, current_selected_unit_index)
-		if((unit_selection.is_valid_recuitlist(get_chosen_unit_ids()) == true) and #chosen_units <= max_selectalbe_units_l) then
+		if unit_selection.is_valid_recuitlist(get_chosen_unit_ids()) and #chosen_units <= max_selectalbe_units_l then
 			update_chosen_units()
 			update_chosen_units()
 		else
@@ -345,7 +346,7 @@ unit_selection.do_selection = function(side)
 	local on_remove_button = function()
 		if not pyr_npt_helper.tablecontains(chosen_units, current_selected_unit_index) then return end
 		pyr_npt_helper.tableremovevalue(chosen_units, current_selected_unit_index)
-		if(unit_selection.is_valid_recuitlist(get_chosen_unit_ids()) == true) then
+		if unit_selection.is_valid_recuitlist(get_chosen_unit_ids()) then
 			update_chosen_units()
 		else
 			table.insert(chosen_units, current_selected_unit_index)
