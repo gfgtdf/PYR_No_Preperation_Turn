@@ -6,7 +6,7 @@ unit_selection.max_selectalbe_units = function()
 end
 unit_selection.max_selectalbe_units_gold_limit = function()
 	local r = tonumber(wesnoth.get_variable("pyr_npt_gold_limit") or -1)
-	if r == -1 then
+	if r < 1 then
 		return 1000000000
 	else
 		return r
@@ -14,7 +14,7 @@ unit_selection.max_selectalbe_units_gold_limit = function()
 end
 
 -- @ret1 boolean
--- @ret2 a strign with the message if invlid othewrwise nil
+-- @ret2 a string with the message if invalid othewrwise nil
 function unit_selection.is_valid_recuitlist(unitidlist)
 	for k,v in pairs(unitidlist) do
 		if(wesnoth.unit_types[v] == nil) then
