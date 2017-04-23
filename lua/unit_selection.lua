@@ -267,12 +267,6 @@ unit_selection.do_selection = function(side)
 		return pyr_npt_helper.tablemap(chosen_units, function(index) return unit_types[index].id end)
 	end
 	
-	--note that the help won't show up if you havent discovered that unit yet.
-	local show_help = function()
-		if(current_selected_unit_index ~= 0) then
-			wesnoth.wml_actions.open_help({topic = "unit_" .. unit_types[current_selected_unit_index].id})
-		end
-	end
 	local set_race = function(race_number)
 		race_number = race_number or wesnoth.get_dialog_value("race_list")
 		local race_id = unit_races[race_number].id
@@ -295,8 +289,7 @@ unit_selection.do_selection = function(side)
 	end
 	
 	local update_unit = function()
-		wesnoth.set_dialog_value(unit_types[current_selected_unit_index].image .. "~SCALE(72,72)", "unit_image")
-		wesnoth.set_dialog_value(tostring(unit_types[current_selected_unit_index].name), "unit_name")
+		wesnoth.set_dialog_value(wesnoth.unit_types[unit_types[current_selected_unit_index].id], "unit_preview")
 	end
 	
 	local set_unit = function()
@@ -378,7 +371,6 @@ unit_selection.do_selection = function(side)
 		wesnoth.set_dialog_callback(set_race, "race_list")
 		wesnoth.set_dialog_callback(set_unit, "unit_list")
 		wesnoth.set_dialog_callback(set_unit_chosen, "chosen_unit_list")
-		wesnoth.set_dialog_callback(show_help, "show_help_button")
 		wesnoth.set_dialog_callback(on_add_button, "add_button")
 		wesnoth.set_dialog_callback(on_remove_button, "remove_button")
 		wesnoth.set_dialog_callback(on_remove_all_button, "remove_all_button")

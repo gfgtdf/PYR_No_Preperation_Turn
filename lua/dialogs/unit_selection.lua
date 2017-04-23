@@ -4,8 +4,7 @@ local _ = _textdomain_pyr_npt
 local function GUI_FORCE_WIDGET_MINIMUM_SIZE(w,h, content)
 	return T.stacked_widget {
 		definition = "default",
-			T.stack {
-				T.layer {
+			T.layer {
 				T.row {
 					T.column {
 						T.spacer {
@@ -27,7 +26,6 @@ local function GUI_FORCE_WIDGET_MINIMUM_SIZE(w,h, content)
 					}
 				} 
 			}
-		}
 	}
 end
 local unit_list = T.listbox {
@@ -155,7 +153,6 @@ local chosen_unit_panel = T.grid{
 
 local race_list = T.listbox {
 	id = "race_list",
-	vertical_scrollbar_mode = "always",
 	T.list_definition {
 		T.row {
 			T.column {
@@ -185,81 +182,69 @@ local race_list = T.listbox {
 
 
 local details_panel_pages =   T.grid {
-				--horizontal_grow = true,
-				--vertical_grow = true,
-				--horizontal_alignment = "left",
-				--vertical_alignment = "top",
-		T.row {
-			T.column {
-				border = "all",
-				border_size = 5,
-				horizontal_alignment = "left",
-				vertical_alignment = "top",
-				T.image {	
-					id = "unit_image"
-				}
-			}
-		},
 		T.row {
 			T.column {
 				border = "all",
 				border_size = 5,
 				horizontal_grow = true,
 				vertical_grow = true,
-				GUI_FORCE_WIDGET_MINIMUM_SIZE(80,50,
-					T.label {
-						id = "unit_name",
-						wrap= true
-					}
-				)
-			}
-		},
-		T.row {
-			vertical_alignment = "bottom",
-			T.column {
-				border = "all",
-				border_size = 5,
-				vertical_alignment = "bottom",
-				T.button {
-					id = "show_help_button",
-					label = _"show help"
+				T.unit_preview_pane {	
+					definition = "default",
+					id = "unit_preview"
 				}
 			}
 		},
 		T.row {
-			vertical_alignment = "bottom",
-			T.column {
-				border = "all",
-				border_size = 5,
-				vertical_alignment = "bottom",
-				T.button {
-					id = "add_button",
-					label = _"Add"
-				}
-			}
-		},
-		T.row {
-			vertical_alignment = "bottom",
-			T.column {
-				border = "all",
-				border_size = 5,
-				vertical_alignment = "bottom",
-				T.button {
-					id = "remove_button",
-					label = _"Remove"
-				}
-			}
-		},
-		T.row {
-			grow_factor = 1,
-			vertical_alignment = "bottom",
 			T.column {
 				border = "all",
 				border_size = 5,
 				horizontal_alignment = "left",
-				vertical_alignment = "bottom",
-				T.spacer {
-					id = "details_spacer",
+				vertical_alignment = "top",
+				T.grid {
+					T.row {
+						T.column {
+							border = "all",
+							border_size = 5,
+							horizontal_alignment = "left",
+							vertical_alignment = "top",
+							T.button {
+								id = "add_button",
+								label = _"Add"
+							},
+						},
+						T.column {
+							border = "all",
+							border_size = 5,
+							horizontal_alignment = "left",
+							vertical_alignment = "top",
+							T.button {
+								id = "remove_button",
+								label = _"Remove"
+							},
+						},
+					},
+					T.row {
+						T.column {
+							border = "all",
+							border_size = 5,
+							horizontal_alignment = "left",
+							vertical_alignment = "top",
+							T.button {
+								id = "random_choice_button",
+								label = _"Fill Random"
+							},
+						},
+						T.column {
+							border = "all",
+							border_size = 5,
+							horizontal_alignment = "left",
+							vertical_alignment = "top",
+							T.button {
+								id = "remove_all_button",
+								label = _"Remove all"
+							},
+						},
+					},
 				}
 			}
 		},
@@ -269,45 +254,23 @@ local details_panel_pages =   T.grid {
 				border = "all",
 				border_size = 5,
 				vertical_alignment = "bottom",
+				horizontal_grow = true,
 				T.button {
-					id = "remove_all_button",
-					label = _"Remove All"
-				}
-			}
-		},
-		T.row {
-			vertical_alignment = "bottom",
-			T.column {
-				border = "all",
-				border_size = 5,
-				vertical_alignment = "bottom",
-				T.button {
-					id = "random_choice_button",
-					label = _"Fill Random"
-				}
-			}
-		},
-		T.row {
-			vertical_alignment = "bottom",
-			T.column {
-				border = "all",
-				border_size = 5,
-				vertical_alignment = "bottom",
-				T.button {
+					definition = "large",
 					id = "ok",
 					label = _"Ok"
 				}
 			}
-		}
+		},
 }
 
 
 local main_window = {
 	maximum_height = 700,
-	maximum_width = 850,
+	maximum_width = 900,
 
-	T.helptip { id = "tooltip_large" }, -- mandatory field
-	T.tooltip { id = "tooltip_large" }, -- mandatory field
+	T.helptip { id = "tooltip" }, -- mandatory field
+	T.tooltip { id = "tooltip" }, -- mandatory field
 
 	T.linked_group { id = "pyr_image", fixed_width = true },
 	T.linked_group { id = "pyr_image_chosen", fixed_width = true },

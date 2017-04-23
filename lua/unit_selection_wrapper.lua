@@ -47,23 +47,26 @@ function unit_selection_wrapper.let_player_choose_sides()
 	for i,v in ipairs(sides) do
 		table.insert(sided_numbers, v.side)
 	end	
-	
-	local result = pyr_npt_synconize_choice(
+	local result = wesnoth.synchronize_choices(_ "recruit selection",
 		function(side)
-			while true do
-				local retv = pyr_npt_unit_selection.do_selection(side)
-				if pyr_npt_unit_confirmation.confirm_recruitlist(retv) then
-					return {serialized_recruits = pyr_npt_helper.serialize(retv)}
+			if wesnoth.sides[side].controller == "human" then
+				while true do
+					local retv = pyr_npt_unit_selection.do_selection(side)
+					if pyr_npt_unit_confirmation.confirm_recruitlist(retv) then
+						return {serialized_recruits = pyr_npt_helper.serialize(retv)}
+					end
 				end
+			else
+				local retv = unit_selection_wrapper.ai_chose(side)
+				return {serialized_recruits = pyr_npt_helper.serialize(retv)}
 			end
 		end,
 		function(side)
-			local retv = unit_selection_wrapper.ai_chose(side)
-			return {serialized_recruits = pyr_npt_helper.serialize(retv)}
+			return {}
+		--	return {serialized_recruits = pyr_npt_helper.serialize(wesnoth.sides[side].recruit)}
 		end,
 		sided_numbers
 	)
-
 
 	for k,v in pairs(result) do
 		if(v.serialized_recruits ~= nil) then
