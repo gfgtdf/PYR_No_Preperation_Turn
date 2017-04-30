@@ -1,22 +1,24 @@
 --<<
 local _ = _textdomain_pyr_npt
+
 local confirm_recruitlist = function (recruitlist)
 	local recruit_number = #recruitlist
 	local images = pyr_npt_helper.tablemap(recruitlist, function(uid) return wesnoth.unit_types[uid].__cfg.image or pyr_npt_helper.thex_png end)
 	local image_per_row = 5
 	local rows = math.ceil(recruit_number/image_per_row)
 	local gridcontent = {}
+	-- Fill gridcontent
 	for row = 1, rows do
 		local rowcontent = { grow_factor = 1, horizontal_grow = true, vertical_grow = true,}
 		for col = 1, image_per_row do
 			local cellcontent =  { grow_factor = 1, horizontal_grow = true, vertical_grow = true,}
 			local image = pyr_npt_helper.thex_png
-			local index = (row - 1)*image_per_row + col 
+			local index = (row - 1) * image_per_row + col 
 			if index <= #images then
 				image = images[index] .. "~SCALE(72,72)"
 			end
 			table.insert(cellcontent, T.image {
-				--name = image,
+				label = image,
 				id = "unitimage" .. tostring(index)
 			})
 			
@@ -24,6 +26,7 @@ local confirm_recruitlist = function (recruitlist)
 		end
 		table.insert(gridcontent, T.row(rowcontent))
 	end
+	-- Alt text
 	if rows == 0 then
 		table.insert(gridcontent, T.row {
 			T.column {
@@ -33,19 +36,7 @@ local confirm_recruitlist = function (recruitlist)
 			}
 		})
 	end
-	local preshow = function()
-		for row = 1, rows do
-			for col = 1, image_per_row do
-				local image = pyr_npt_helper.thex_png
-				local index = (row - 1)*image_per_row + col 
-				if index <= #images then
-					image = images[index] .. "~SCALE(72,72)"
-				end
-				wesnoth.set_dialog_value(image, "unitimage" .. tostring(index))
-			end
-		end
-	end
-	
+	-- the dialog
 	local dialog = {
 		maximum_height = 700,
 		maximum_width = 850,
@@ -130,7 +121,7 @@ local confirm_recruitlist = function (recruitlist)
 			},
 		}
 	}
-	return wesnoth.show_dialog(dialog, preshow) == 1
+	return wesnoth.show_dialog(dialog) == 1
 end
 
 return { confirm_recruitlist = confirm_recruitlist}

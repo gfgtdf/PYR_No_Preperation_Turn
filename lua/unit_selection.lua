@@ -1,12 +1,18 @@
 --<<
 local _ = _textdomain_pyr_npt
+local helper = wesnoth.require("lua/helper.lua")
+local V = helper.set_wml_var_metatable {}
+local T = helper.set_wml_tag_metatable {}
+	
 local unit_selection = {}
-unit_selection.max_selectalbe_units = function()
-	return wesnoth.get_variable("pyr_npt_unit_limit") or 10
+
+function unit_selection.max_selectalbe_units()
+	return V.pyr_npt_unit_limit or 10
 end
-unit_selection.max_selectalbe_units_gold_limit = function()
-	local r = tonumber(wesnoth.get_variable("pyr_npt_gold_limit") or -1)
-	if r < 1 then
+
+function unit_selection.max_selectalbe_units_gold_limit()
+	local r = tonumber(V.pyr_npt_gold_limit)
+	if r < 1 or t == nil then
 		return 1000000000
 	else
 		return r
@@ -22,11 +28,11 @@ function unit_selection.is_valid_recuitlist(unitidlist)
 			return false, "found invalid unit id:" .. tostring(v)
 		end
 	end
-	if(#unitidlist > unit_selection.max_selectalbe_units()) then
+	if #unitidlist > unit_selection.max_selectalbe_units() then
 		--wesnoth.message("found too many units in recruitlist")
 		return false, "found too many units in recruitlist"
 	end
-	if(pyr_npt_helper.tablereduce(unitidlist, function(a,b) return a + wesnoth.unit_types[b].cost end, 0) > unit_selection.max_selectalbe_units_gold_limit()) then
+	if pyr_npt_helper.tablereduce(unitidlist, function(a,b) return a + wesnoth.unit_types[b].cost end, 0) > unit_selection.max_selectalbe_units_gold_limit() then
 		--wesnoth.message("found too expensive units in recruitlist")
 		return false, "found too expensive units in recruitlist"
 	end
@@ -36,9 +42,7 @@ end
 -- all units that exist in data/core/units except 'fog clearer'
 local mainline_units = {"Blood Bat", "Dread Bat", "Vampire Bat", "Boat", "Galleon", "Pirate Galleon", "Transport Galleon", "Drake Arbiter", "Armageddon Drake", "Drake Blademaster", "Drake Burner", "Drake Clasher", "Drake Enforcer", "Drake Fighter", "Fire Drake", "Drake Flameheart", "Drake Flare", "Drake Glider", "Hurricane Drake", "Inferno Drake", "Sky Drake", "Drake Thrasher", "Drake Warden", "Drake Warrior", "Dwarvish Arcanister", "Dwarvish Berserker", "Dwarvish Dragonguard", "Dwarvish Explorer", "Dwarvish Fighter", "Dwarvish Guardsman", "Dwarvish Lord", "Dwarvish Pathfinder", "Dwarvish Runemaster", "Dwarvish Runesmith", "Dwarvish Scout", "Dwarvish Sentinel", "Dwarvish Stalwart", "Dwarvish Steelclad", "Dwarvish Thunderer", "Dwarvish Thunderguard", "Dwarvish Ulfserker", "Elvish Archer", "Elvish Avenger", "Elvish Captain", "Elvish Champion", "Elvish Druid", "Elvish Enchantress", "Elvish Fighter", "Elvish Hero", "Elvish High Lord", "Elvish Lady", "Elvish Lord", "Elvish Marksman", "Elvish Marshal", "Elvish Outrider", "Elvish Ranger", "Elvish Rider", "Elvish Scout", "Elvish Shaman", "Elvish Sharpshooter", "Elvish Shyde", "Elvish Sorceress", "Elvish Sylph", "Direwolf Rider", "Goblin Impaler", "Goblin Knight", "Goblin Pillager", "Goblin Rouser", "Goblin Spearman", "Wolf Rider", "Gryphon", "Gryphon Master", "Gryphon Rider", "Horseman", "Grand Knight", "Knight", "Lancer", "Paladin", "Bowman", "Cavalier", "Cavalryman", "Dragoon", "Duelist", "Fencer", "General", "Grand Marshal", "Halberdier", "Heavy Infantryman", "Iron Mauler", "Javelineer", "Lieutenant", "Longbowman", "Master at Arms", "Master Bowman", "Pikeman", "Royal Guard", "Sergeant", "Shock Trooper", "Spearman", "Swordsman", "Mage", "Arch Mage", "Elder Mage", "Great Mage", "Mage of Light", "Red Mage", "Silver Mage", "White Mage", "Outlaw", "Assassin", "Bandit", "Footpad", "Fugitive", "Highwayman", "Rogue", "Ruffian", "Thief", "Thug", "Peasant", "Royal Warrior", "Woodsman", "Huntsman", "Poacher", "Ranger", "Trapper", "Arif", "Batal", "Elder Falcon", "Falcon", "Faris", "Ghazi", "Hadaf", "Hakim", "Jawal", "Jundi", "Khaiyal", "Khalid", "Mighwar", "Monawish", "Mudafi", "Mufariq", "Muharib", "Naffat", "Qanas", "Qatif_al_nar", "Rami", "Rasikh", "Saree", "Shuja", "Tabib", "Tineen", "Mermaid Diviner", "Mermaid Enchantress", "Merman Entangler", "Merman Fighter", "Merman Hoplite", "Merman Hunter", "Mermaid Initiate", "Merman Javelineer", "Merman Netcaster", "Mermaid Priestess", "Mermaid Siren", "Merman Spearman", "Merman Triton", "Merman Warrior", "Cuttle Fish", "Fire Dragon", "Fire Guardian", "Giant Mudcrawler", "Giant Rat", "Giant Scorpion", "Giant Spider", "Mudcrawler", "Sea Serpent", "Skeletal Dragon", "Tentacle of the Deep", "Water Serpent", "Wolf", "Direwolf", "Great Wolf", "Yeti", "Naga Fighter", "Naga Myrmidon", "Naga Warrior", "Ogre", "Young Ogre", "Orcish Archer", "Orcish Assassin", "Orcish Crossbowman", "Orcish Grunt", "Orcish Leader", "Orcish Ruler", "Orcish Slayer", "Orcish Slurbow", "Orcish Sovereign", "Orcish Warlord", "Orcish Warrior", "Saurian Ambusher", "Saurian Augur", "Saurian Flanker", "Saurian Oracle", "Saurian Skirmisher", "Saurian Soothsayer", "Great Troll", "Troll Hero", "Troll Rocklobber", "Troll", "Troll Shaman", "Troll Warrior", "Troll Whelp", "Ghast", "Ghoul", "Necrophage", "Soulless", "Walking Corpse", "Necromancer", "Ancient Lich", "Dark Adept", "Dark Sorcerer", "Lich", "Skeleton", "Skeleton Archer", "Banebow", "Bone Shooter", "Chocobone", "Deathblade", "Death Knight", "Draug", "Revenant", "Ghost", "Nightgaunt", "Shadow", "Spectre", "Wraith", "Ancient Wose", "Elder Wose", "Wose"}
 
-unit_selection.get_unit_types_current_era_ids = function(leaders)
-	
-	local helper = wesnoth.require("lua/helper.lua")
+function unit_selection.get_unit_types_current_era_ids(leaders)
 	local era = wesnoth.game_config.era
 	era = era or {
 		T.multiplayer_side {
@@ -62,7 +66,7 @@ unit_selection.get_unit_types_current_era_ids = function(leaders)
 end
 
 -- returns a list containg get_unit_types_current_era and all units that those units can advance to
-unit_selection.get_unit_types_current_era_and_advancemts= function()
+function unit_selection.get_unit_types_current_era_and_advancemts()
 	local units_to_do = unit_selection.get_unit_types_current_era_ids(true)
 	local r = {}
 	local known_units = pyr_npt_helper.deepcopy(units_to_do)
@@ -91,8 +95,8 @@ unit_selection.get_unit_types_current_era_and_advancemts= function()
 	return r
 end
 
--- returns a list containg evry unit that is recruitable by any side.
-unit_selection.get_unit_types_current_era = function()
+-- returns a list containg every unit that is recruitable by any side.
+function unit_selection.get_unit_types_current_era()
 
 	local units = unit_selection.get_unit_types_current_era_ids()
 	local r = {}
@@ -116,7 +120,7 @@ unit_selection.get_unit_types_current_era = function()
 	return r
 end
 
-unit_selection.get_unit_types_all = function()
+function unit_selection.get_unit_types_all()
 	local r = {}
 	for key,value in pairs(wesnoth.unit_types) do
 		local cfg = value.__cfg
@@ -129,7 +133,7 @@ unit_selection.get_unit_types_all = function()
 	return r
 end
 
-unit_selection.get_unit_types_original = function(side)
+function unit_selection.get_unit_types_original(side)
 	local r = {}
 	for k,v in pairs(wesnoth.sides[side].recruit) do
 		if not wesnoth.unit_types[v] then
@@ -143,8 +147,8 @@ unit_selection.get_unit_types_original = function(side)
 end
 
 --returns an array of wmltables for all unit types available.
-unit_selection.get_unit_types = function(side)
-	local pool_type = tostring(wesnoth.get_variable("pyr_npt_unit_pool_type") or "recruitable")
+function unit_selection.get_unit_types(side)
+	local pool_type = tostring(V.pyr_npt_unit_pool_type or "recruitable")
 	if pool_type == "recruitable" then
 		return unit_selection.get_unit_types_current_era()
 	elseif pool_type == "advanceable" then
@@ -163,7 +167,7 @@ unit_selection.get_unit_types = function(side)
 	end
 end
 
-unit_selection.get_unit_races = function(unit_types)
+function unit_selection.get_unit_races(unit_types)
 	local found_races = {}
 	local retv = {}
 	for key,value in pairs(unit_types) do
@@ -185,15 +189,17 @@ unit_selection.get_unit_races = function(unit_types)
 	return retv
 end
 
-unit_selection.get_biggest_race_size = function(unit_types)
+function unit_selection.get_biggest_race_size(unit_types)
 	
 	local maxkey, maxvalue = pyr_npt_helper.tablemax(
 		pyr_npt_helper.tablegroupby(unit_types, function(index, ut) return (ut.race or "unknown") end),
-		function(t1,t2) return #t1 < #t2 end)
+		function(t1,t2) return #t1 < #t2 end
+	)
 	return maxvalue and #maxvalue or 0
 end
 
-unit_selection.random_choice = function(unittypes, max_gold, max_count)
+-- used for ai sides and for 'fill randomly'
+function unit_selection.random_choice(unittypes, max_gold, max_count)
 	--choose random types.
 	local r = {}
 	local units_left = max_count
@@ -247,9 +253,8 @@ function unit_selection.fill_random(chosen_units, all_unittypes, max_gold, max_c
 	end
 end
 
-unit_selection.do_selection = function(side)
+function unit_selection.do_selection(side)
 	local pyr_npt_helper = pyr_npt_helper
-	T = helper.set_wml_tag_metatable {}
 	local dialogs = pyr_npt_unit_selection_dialogs
 	local unit_types = unit_selection.get_unit_types(side)
 	local unit_races = unit_selection.get_unit_races(unit_types)
@@ -364,6 +369,7 @@ unit_selection.do_selection = function(side)
 		unit_selection.fill_random(chosen_units, unit_types, max_gold, max_count)
 		update_chosen_units()
 	end
+
 	local preshow = function()
 		for index,value in ipairs(unit_races) do
 			wesnoth.set_dialog_value(unit_races[index].plural_name or "a", "race_list",index, "race_name")
@@ -380,6 +386,7 @@ unit_selection.do_selection = function(side)
 		set_unit()
 		update_chosen_units()
 	end
+
 	wesnoth.show_dialog(dialogs.normal, preshow)
 	return get_chosen_unit_ids()
 end

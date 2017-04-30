@@ -1,9 +1,10 @@
 --<<
 local _ = _textdomain_pyr_npt
-local unit_selection_wrapper = {}
 local V = helper.set_wml_var_metatable {}
 
-unit_selection_wrapper.ai_chose = function(side)
+local unit_selection_wrapper = {}
+
+function unit_selection_wrapper.ai_chose(side)
 
 	if V.pyr_npt_no_ai then
 		return wesnoth.sides[side].recruit
@@ -72,9 +73,9 @@ function unit_selection_wrapper.let_player_choose_sides()
 			error("failed to get data from non-empty side")
 		end
 	end
-	wesnoth.set_variable("pyr_npt_has_chosen_unit", true)
+	V.pyr_npt_has_chosen_unit = true
 end
 
 return unit_selection_wrapper
--->>
 
+-->>
