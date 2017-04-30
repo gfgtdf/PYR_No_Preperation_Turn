@@ -253,6 +253,8 @@ function unit_selection.fill_random(chosen_units, all_unittypes, max_gold, max_c
 	end
 end
 
+-- @a side: the number of the side to select recruits for
+-- @returns an array of unit id strings.
 function unit_selection.do_selection(side)
 	local pyr_npt_helper = pyr_npt_helper
 	local dialogs = pyr_npt_unit_selection_dialogs
