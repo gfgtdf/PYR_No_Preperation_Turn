@@ -12,7 +12,7 @@ end
 
 function unit_selection.max_selectalbe_units_gold_limit()
 	local r = tonumber(V.pyr_npt_gold_limit)
-	if r < 1 or t == nil then
+	if type(r) ~= "number" or r < 1 then
 		return 1000000000
 	else
 		return r
