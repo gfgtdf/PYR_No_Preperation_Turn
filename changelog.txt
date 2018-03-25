@@ -1,6 +1,7 @@
-1.2
+1.2.1
 - Fixed a security issue (do not use loadstring to deserialize data from other players).
 - Fixed 'Illegal path (blacklisted filename)' wanring.
+1.2
 - Updates for 1.13.7
 - Fixed an error when a options variable was not set.
 1.1
