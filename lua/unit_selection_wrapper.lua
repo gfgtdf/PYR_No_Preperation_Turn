@@ -76,6 +76,10 @@ function unit_selection_wrapper.let_player_choose_sides()
 	V.pyr_npt_has_chosen_unit = true
 end
 
+function wesnoth.wml_actions.pyr_npt_choose_units(cfg)
+	unit_selection_wrapper.let_player_choose_sides()
+end
+
 return unit_selection_wrapper
 
 -->>
