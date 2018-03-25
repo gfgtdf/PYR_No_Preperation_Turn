@@ -1,3 +1,8 @@
+1.2
+- Fixed a security issue (do not use loadstring to deserialize data from other players).
+- Fixed 'Illegal path (blacklisted filename)' wanring.
+- Updates for 1.13.7
+- Fixed an error when a options variable was not set.
 1.1
 - Added 'Original recruitlist' pool type.
 - Fixed errors when the era specifies invalid recruits unit ids.
