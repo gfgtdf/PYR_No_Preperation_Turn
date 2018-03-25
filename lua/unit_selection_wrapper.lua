@@ -46,12 +46,12 @@ function unit_selection_wrapper.let_player_choose_sides()
 				while true do
 					local retv = pyr_npt_unit_selection.do_selection(side)
 					if pyr_npt_unit_confirmation.confirm_recruitlist(retv) then
-						return {serialized_recruits = pyr_npt_helper.serialize(retv)}
+						return { recruits = table.concat(retv, ",") }
 					end
 				end
 			else
 				local retv = unit_selection_wrapper.ai_chose(side)
-				return {serialized_recruits = pyr_npt_helper.serialize(retv)}
+				return { recruits = table.concat(retv, ",") }
 			end
 		end,
 		sided_numbers
@@ -59,8 +59,8 @@ function unit_selection_wrapper.let_player_choose_sides()
 
 	for k,v in pairs(result) do
 		local side = wesnoth.sides[k]
-		if v.serialized_recruits ~= nil then
-			local recruitlist = pyr_npt_helper.deseralize(v.serialized_recruits)
+		if v.recruits ~= nil then
+			local recruitlist = pyr_npt_helper.comma_to_list(v.recruits)
 			local should_ignore_invalid = (side.controller == "ai" or side.controller == "null") and V.pyr_npt_no_ai
 			if not should_ignore_invalid then
 				local is_valid, reason = pyr_npt_unit_selection.is_valid_recuitlist(recruitlist)

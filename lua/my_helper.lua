@@ -56,145 +56,16 @@ function myhelper.tablereduce (list, fn, start)
 	end 
 	return acc 
 end
---I'd be happy to be able to always call this function without the helper. prefix.
-function Set (list)
-	local set = {}
-	for _, l in ipairs(list) do set[l] = true end
-	return set
-end
-myhelper.Set = Set
 
-myhelper.max = function(a,b ) return a > b and a or b end
-myhelper.min = function(a,b ) return a < b and a or b end
-
-
--- TODO add support for userdata
--- for real serialasition i always use serialize. This is only used by cwo
-myhelper.serialize_pretty = function(o, accept_nil, indention)
-	-- getting nil here nomrlnomaly mens something got wrong so default = no
-	accept_nil = accept_nil or false
-	indention = indention or 0
-	local r = ""
-	if type(o) == "nil" and accept_nil then
-		return "nil"
-	elseif type(o) == "number" or type(o) == "boolean" then
-		return tostring(o)
-	elseif type(o) == "string" then
-		return string.format("%q", o)
-	elseif type(o) == "table" then
-		r = "{\n" .. string.rep('\t',indention)
-		for k,v in pairs(o) do
-			r = r .. "\t[" .. myhelper.serialize_pretty(k,false) .. "] = " .. myhelper.serialize_pretty(v,false,indention + 1 ) .. ",\n" .. string.rep('\t',indention)
-		end
-		return r .. "}"
-	elseif type(o) == "userdata" and getmetatable(o) == "translatable string" then
-		-- maybe there is a better way?
-		return myhelper.serialize_pretty(tostring(o))
-	elseif type(o) == "function" then 
-		return "loadstring(" .. string.format("%q", string.dump(o)) .. ")"
-	else
-		error("cannot serialize a " .. type(o))
-	end
+function myhelper.max(a, b)
+	return a > b and a or b
 end
 
--- a function for debugging. cwo = Console Write Object
-function myhelper.cwo(obj)
-	local m = myhelper.serialize_pretty(obj, true)
-	wesnoth.fire("message",{ speaker = "narrator", message = m })
-	wesnoth.fire("wml_message", { logger = "err", message =  m })
-end
--- to save keystrokes when using this  in the :lua commandline .
-cwo = myhelper.cwo
--- a function for debugging. cwo = Console Write Object
-function myhelper.log_object(obj, logger)
-	logger = logger or "err"
-	wesnoth.fire("wml_message",{ logger = logger, message =  myhelper.serialize_pretty(obj, true) .. "\n\n\n"})
+function myhelper.min(a, b)
+	return a < b and a or b
 end
 
--- this method searializes data to a string that can be pared with deseralize.
--- right now i dont use it for too big data but i want this method to be as fast as possible.
--- in my tests this was slightly faster than the previous version (i suppose that was just because f the localy stored functions)
--- 1.5 vs 1.4 sceonds to serialitze 1000 units.
--- the first verion took more than 1000 seconds for 1000 units.
--- note that these results are meaningless if we dont know the complexity of the test units
-function myhelper.serialize(oo, accept_nil)
-	accept_nil = accept_nil or false
-	-- storing important functions as upvalues to to access it faster
-	local tostring = tostring
-	local type = type
-	local pairs = pairs
-	local insert = table.insert
-	local format = string.format
-	-- i need this, oterwise s_o_2 isnt saved as upvalue in itself
-	local s_o_2 = nil
-	s_o_2 = function(o, builder)
-		local o_t = type(o)
-		if o_t == "number" or o_t == "boolean" then
-			insert(builder, tostring(o))
-			return
-		elseif o_t == "userdata" and getmetatable(o) == "translatable string" then
-			s_o_2(tostring(o), builder)
-			return
-		elseif o_t == "string" then
-			insert(builder, format("%q", o))
-			return
-		elseif o_t == "table" then
-			insert(builder, "{ ")
-			for k,v in pairs(o) do
-				insert(builder, "[")
-				s_o_2(k, builder)
-				insert(builder, "] = ")
-				s_o_2(v, builder)
-				insert(builder, ", ")
-			end
-			insert(builder, "}")
-			return 
-		elseif o_t == "function" then
-			-- i should remove this because the attpempt to store a function means normaly an error occured 
-			-- and also because functions with upvalues arent serialized right anyway, but i dont want to.
-			insert(builder, "loadstring(" .. format("%q", string.dump(o)) .. ")" )
-			return
-		elseif o_t == "nil" and accept_nil then
-			insert(builder, "nil")
-			return
-		else
-			error("cannot serialize a " .. o_t)
-		end
-	end
-	-- finaly we call it.
-	local build = {}
-	s_o_2(oo, build)
-	return table.concat(build)
-end
-
--- obvious
-function myhelper.deseralize(str)
-	return loadstring("return " .. str)()
-end
-
--- list globals, another debuggging function (to detect spamming in the gobal namespace).
-function l_g(print_common)
-	-- ignore some keys that are always present
-	local known_engine_values = Set {"table", "next", "string", "xpcall", "tostring", "print", "os", 
-		"unpack", "wesnoth", "pairs", "next", "assert", "rawlen", "ipairs", "rawequal", "collectgarbage", 
-		"load", "tonumber", "getmetatable", "rawset", "_VERSION", "_G", "math", "pcall", "type", "debug", 
-		"select", "rawget", "loadstring", "table", "setmetatable", "error", "", "", "", "", ""}
-	local known_common_values = Set {
-		"helper", --helper
-		"H", --helper alias
-		"T", --set_wml_tag_metatable 
-		"V", --set_wml_var_metatable
-		"W", --set_wml_action_metatable 
-	}
-	for k,v in pairs(_G) do
-		if (print_common or ((not known_engine_values[k]) and (not known_common_values[k]))) then
-			myhelper.cwo(k)
-		end
-	end
-end
-
---not much to say
-myhelper.deepcopy = function (orig)
+function myhelper.deepcopy(orig)
 	local orig_type = type(orig)
 	local copy
 	if orig_type == 'table' then
@@ -209,12 +80,23 @@ myhelper.deepcopy = function (orig)
 	return copy
 end
 
-myhelper.trim = function(s)
+function myhelper.trim(s)
   return s:match'^%s*(.*%S)' or ''
+end
+
+function myhelper.split(s)
+	return tostring(s or ""):gmatch("[^%s,][^,]*")
+end
+
+function myhelper.comma_to_list(str)
+	local res = {}
+	for elem in myhelper.split(str) do
+		table.insert(res, myhelper.trim(elem))
+	end
+	return res
 end
 
 myhelper.thex_png = "misc/blank-hex.png"
 
 return myhelper
-
 -->>
