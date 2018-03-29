@@ -6,6 +6,24 @@ local T = helper.set_wml_tag_metatable {}
 	
 local unit_selection = {}
 
+function unit_selection.pause()
+		
+	local old_callback = wesnoth.game_events.on_mouse_action
+	local hasclick = nil
+	
+	function wesnoth.game_events.on_mouse_action(x,y)
+		hasclick = true
+	end
+
+	while not hasclick do
+		wesnoth.wml_actions.print { duration = 500, text = _"Click anywhere on the map to go back to 'Pick your recuits' dialog", size = 24 }
+		wesnoth.wml_actions.delay { time = 500 }
+	end
+	wesnoth.wml_actions.print { duration = 1, text = " ", size = 24 }
+
+	wesnoth.game_events.on_mouse_action = old_callback
+end
+
 function unit_selection.max_selectalbe_units()
 	return V.pyr_npt_unit_limit or 10
 end
@@ -256,32 +274,44 @@ end
 -- @a side: the number of the side to select recruits for
 -- @returns an array of unit id strings.
 function unit_selection.do_selection(side)
-	local pyr_npt_helper = pyr_npt_helper
+	local state = {}
+	state.unit_types = unit_selection.get_unit_types(side)
+	state.chosen_units = {}
+	state.side = side
+	while not unit_selection.show_dialog(state) do
+		unit_selection.pause()
+	end
+	return pyr_npt_helper.tablemap(state.chosen_units, function(index) return state.unit_types[index].id end)
+end
+-- @a state contains the state of the dialog is has the fields:
+-- - unit_types: an array of wml tables containing the unittypes __cfg for each seletable unit.
+-- - chosen_units: a list containing integerindexes to unit_types
+-- - selected_unit: an index into unit_types showing which unit is currently selected
+-- - race_id: the id of the race that is currently selected.
+-- @returns true if the selected is finished, false if 'pause' was pressed.
+function unit_selection.show_dialog(state)
 	local dialogs = pyr_npt_unit_selection_dialogs
-	local unit_types = unit_selection.get_unit_types(side)
-	local unit_races = unit_selection.get_unit_races(unit_types)
-	local maxrace_size = unit_selection.get_biggest_race_size(unit_types)
+	-- an array or race cfg tables.
+	local unit_races = unit_selection.get_unit_races(state.unit_types)
+	local maxrace_size = unit_selection.get_biggest_race_size(state.unit_types)
 	local max_selectalbe_units_l = unit_selection.max_selectalbe_units()
 	
 	--a list containing integerindexes to unit_types
 	local current_unit_list = {}
-	--a list containing integerindexes to unit_types
-	local chosen_units = {}
-	local current_selected_unit_index = 0
 	
 	
 	
 	local get_chosen_unit_ids = function()
-		return pyr_npt_helper.tablemap(chosen_units, function(index) return unit_types[index].id end)
+		return pyr_npt_helper.tablemap(state.chosen_units, function(index) return state.unit_types[index].id end)
 	end
 	
 	local set_race = function(race_number)
 		race_number = race_number or wesnoth.get_dialog_value("race_list")
-		local race_id = unit_races[race_number].id
+		state.race_id = unit_races[race_number].id
 		local index = 1
 		current_unit_list = {}
-		for index2,value in ipairs(unit_types) do
-			if value.race == race_id then
+		for index2, value in ipairs(state.unit_types) do
+			if value.race == state.race_id then
 				wesnoth.set_dialog_value((value.image or "") .."~SCALE(72,72)", "unit_list", index, "list_image")
 				wesnoth.set_dialog_value((value.name or "") .. "\n" .. (value.cost or "") .. _"Gold", "unit_list", index, "list_name")
 				current_unit_list[index] = index2
@@ -296,87 +326,103 @@ function unit_selection.do_selection(side)
 		end
 	end
 	
+	local function set_race_initial()
+		for i, v in ipairs(unit_races) do
+			if v.id == state.race_id then
+				wesnoth.set_dialog_value(i, "race_list")
+			end
+		end
+		set_race()
+		for i, v in ipairs(current_unit_list) do
+			if v == state.selected_unit then
+				wesnoth.set_dialog_value(i, "unit_list")
+			end
+		end
+	end
+
 	local update_unit = function()
-		wesnoth.set_dialog_value(wesnoth.unit_types[unit_types[current_selected_unit_index].id], "unit_preview")
+		wesnoth.set_dialog_value(wesnoth.unit_types[state.unit_types[state.selected_unit].id], "unit_preview")
 	end
 	
 	local set_unit = function()
 		local unit_number = wesnoth.get_dialog_value("unit_list")
 		if current_unit_list[unit_number] == nil then return end
-		current_selected_unit_index = current_unit_list[unit_number]
+		state.selected_unit = current_unit_list[unit_number]
 		update_unit()
 	end
 	
 	local set_unit_chosen = function()
 		local unit_number = wesnoth.get_dialog_value("chosen_unit_list")
-		if chosen_units[unit_number] == nil then return end
-		current_selected_unit_index = chosen_units[unit_number]
+		if state.chosen_units[unit_number] == nil then return end
+		state.selected_unit = state.chosen_units[unit_number]
 		update_unit()
 	end
 	
 	local update_chosen_units = function()
 		local index = 1
-		for index2,value in ipairs(chosen_units) do
-			wesnoth.set_dialog_value((unit_types[value].image or "") .."~SCALE(72,72)", "chosen_unit_list", index2, "list_image2")
+		for index2,value in ipairs(state.chosen_units) do
+			wesnoth.set_dialog_value((state.unit_types[value].image or "") .."~SCALE(72,72)", "chosen_unit_list", index2, "list_image2")
 			index = index2 + 1
 		end
 		while index <= max_selectalbe_units_l do
 			wesnoth.set_dialog_value(pyr_npt_helper.thex_png , "chosen_unit_list", index, "list_image2")
 			index = index + 1
 		end
-		local costs = pyr_npt_helper.tablereduce(chosen_units, function(a,b) return a + unit_types[b].cost end, 0)
+		local costs = pyr_npt_helper.tablereduce(state.chosen_units, function(a,b) return a + state.unit_types[b].cost end, 0)
 		local maxcost = unit_selection.max_selectalbe_units_gold_limit()
-		local countdig = math.floor(math.log10(math.max(#chosen_units, 1)))
+		local countdig = math.floor(math.log10(math.max(#state.chosen_units, 1)))
 		local spaces_to_add = string.rep(' ',3*(5-countdig))
 		local costdig = math.floor(math.log10(math.max(costs, 1)))
 		local cost_spaces_to_add = string.rep(' ',3*(5-costdig))
 		
-		wesnoth.set_dialog_value(_"Count:" ..  tostring(#chosen_units) .. spaces_to_add, "pyr_total_count")
+		wesnoth.set_dialog_value(_"Count:" ..  tostring(#state.chosen_units) .. spaces_to_add, "pyr_total_count")
 		if(maxcost == 1000000000) then
-			wesnoth.set_dialog_value(_"Cost:" ..  tostring(costs) .. cost_spaces_to_add, "pyr_total_cost")
+			-- disabled
+			-- wesnoth.set_dialog_value(_"Cost:" ..  tostring(costs) .. cost_spaces_to_add, "pyr_total_cost")
+			wesnoth.set_dialog_value("", "pyr_total_cost")
 		else
 			wesnoth.set_dialog_value(_"Cost:" ..  tostring(costs) .. "/"..  tostring(maxcost) .. cost_spaces_to_add, "pyr_total_cost")
 		end
 	end
 	
 	local on_add_button = function()
-		if pyr_npt_helper.tablecontains(chosen_units, current_selected_unit_index) then return end
-		table.insert(chosen_units, current_selected_unit_index)
-		if unit_selection.is_valid_recuitlist(get_chosen_unit_ids()) and #chosen_units <= max_selectalbe_units_l then
+		if pyr_npt_helper.tablecontains(state.chosen_units, state.selected_unit) then return end
+		table.insert(state.chosen_units, state.selected_unit)
+		if unit_selection.is_valid_recuitlist(get_chosen_unit_ids()) and #state.chosen_units <= max_selectalbe_units_l then
 			update_chosen_units()
 			update_chosen_units()
 		else
-			pyr_npt_helper.tableremovevalue(chosen_units, current_selected_unit_index)
+			pyr_npt_helper.tableremovevalue(state.chosen_units, state.selected_unit)
 		end
 	end
 	
 	local on_remove_button = function()
-		if not pyr_npt_helper.tablecontains(chosen_units, current_selected_unit_index) then return end
-		pyr_npt_helper.tableremovevalue(chosen_units, current_selected_unit_index)
+		if not pyr_npt_helper.tablecontains(state.chosen_units, state.selected_unit) then return end
+		pyr_npt_helper.tableremovevalue(state.chosen_units, state.selected_unit)
 		if unit_selection.is_valid_recuitlist(get_chosen_unit_ids()) then
 			update_chosen_units()
 		else
-			table.insert(chosen_units, current_selected_unit_index)
+			table.insert(state.chosen_units, state.selected_unit)
 		end
 	end
 	
 	local on_remove_all_button = function()
-		chosen_units = {}
+		state.chosen_units = {}
 		update_chosen_units()
 	end
 	
 	local on_random_button = function()
 		local max_gold = unit_selection.max_selectalbe_units_gold_limit()
 		local max_count = max_selectalbe_units_l
-		unit_selection.fill_random(chosen_units, unit_types, max_gold, max_count)
+		unit_selection.fill_random(state.chosen_units, state.unit_types, max_gold, max_count)
 		update_chosen_units()
 	end
-
+	
 	local preshow = function()
 		for index,value in ipairs(unit_races) do
 			wesnoth.set_dialog_value(unit_races[index].plural_name or "a", "race_list",index, "race_name")
 		end
-		wesnoth.set_dialog_value(_"Unit selction for side " .. tostring(side or 1), "title")
+		wesnoth.set_dialog_value(_"Unit selction for side " .. tostring(state.side or 1), "title")
 		wesnoth.set_dialog_callback(set_race, "race_list")
 		wesnoth.set_dialog_callback(set_unit, "unit_list")
 		wesnoth.set_dialog_callback(set_unit_chosen, "chosen_unit_list")
@@ -384,13 +430,13 @@ function unit_selection.do_selection(side)
 		wesnoth.set_dialog_callback(on_remove_button, "remove_button")
 		wesnoth.set_dialog_callback(on_remove_all_button, "remove_all_button")
 		wesnoth.set_dialog_callback(on_random_button, "random_choice_button")
-		set_race()
+		set_race_initial()
 		set_unit()
 		update_chosen_units()
 	end
 
-	wesnoth.show_dialog(dialogs.normal, preshow)
-	return get_chosen_unit_ids()
+	local res = wesnoth.show_dialog(dialogs.normal, preshow)
+	return res ~= 2
 end
 
 return unit_selection

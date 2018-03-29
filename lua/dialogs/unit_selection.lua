@@ -1,7 +1,7 @@
 --<<
 local T = helper.set_wml_tag_metatable {}
 local _ = _textdomain_pyr_npt
-local function GUI_FORCE_WIDGET_MINIMUM_SIZE(w,h, content)
+local function GUI_FORCE_WIDGET_MINIMUM_SIZE(w, h, content)
 	return T.stacked_widget {
 		definition = "default",
 		T.layer {
@@ -258,7 +258,23 @@ local details_panel_pages =   T.grid {
 			T.button {
 				definition = "large",
 				id = "ok",
-				label = _"Ok"
+				label = _"Ok",
+				return_value = 1
+			}
+		}
+	},
+	T.row {
+		vertical_alignment = "bottom",
+		T.column {
+			border = "all",
+			border_size = 5,
+			vertical_alignment = "bottom",
+			horizontal_grow = true,
+			T.button {
+				id = "pause_button",
+				label = _"View Map",
+				tooltip = _"Pause this dialog to take a look at the map, in multiplayer this can also be used to chat with other players.",
+				return_value = 2,
 			}
 		}
 	},
