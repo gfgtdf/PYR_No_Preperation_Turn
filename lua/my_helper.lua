@@ -32,10 +32,29 @@ function myhelper.tablecontains(t, elem)
 	return false
 end
 
+function myhelper.tablecontainsp(t, p)
+	for key, value in pairs(t) do
+		if p(value) then
+            return true
+		end
+	end
+	return false
+end
+
 function myhelper.tablemap(t, fm)
 	local r = {}
 	for key, value in pairs(t) do
 		r[key] = fm(value)
+	end
+	return r
+end
+
+function myhelper.arrayfilter(t, f)
+	local r = {}
+	for key, value in ipairs(t) do
+		if f(value) then
+			r[#r + 1] = value
+		end
 	end
 	return r
 end

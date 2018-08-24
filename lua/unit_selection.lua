@@ -273,11 +273,19 @@ end
 
 -- @a side: the number of the side to select recruits for
 -- @returns an array of unit id strings.
-function unit_selection.do_selection(side)
+function unit_selection.do_selection(side, recent_picks)
 	local state = {}
 	state.unit_types = unit_selection.get_unit_types(side)
 	state.chosen_units = {}
 	state.side = side
+	
+	local matches_id = function(id)
+		return function(ut) return ut.id == id end
+	end
+	local has_unit = function(id)
+		return pyr_npt_helper.tablecontainsp(state.unit_types, matches_id(id))
+	end
+	state.recent_picks = pyr_npt_helper.arrayfilter(recent_picks, has_unit)
 	while not unit_selection.show_dialog(state) do
 		unit_selection.pause()
 	end
@@ -293,14 +301,15 @@ function unit_selection.show_dialog(state)
 	local dialogs = pyr_npt_unit_selection_dialogs
 	-- an array or race cfg tables.
 	local unit_races = unit_selection.get_unit_races(state.unit_types)
+	if state.recent_picks and #state.recent_picks > 0 then
+		table.insert(unit_races, { id = "pyr_npt_recently_selected", plural_name = _ "Recently Picked"})
+	end
 	local maxrace_size = unit_selection.get_biggest_race_size(state.unit_types)
 	local max_selectalbe_units_l = unit_selection.max_selectalbe_units()
 	
 	--a list containing integerindexes to unit_types
 	local current_unit_list = {}
-	
-	
-	
+
 	local get_chosen_unit_ids = function()
 		return pyr_npt_helper.tablemap(state.chosen_units, function(index) return state.unit_types[index].id end)
 	end
@@ -311,7 +320,7 @@ function unit_selection.show_dialog(state)
 		local index = 1
 		current_unit_list = {}
 		for index2, value in ipairs(state.unit_types) do
-			if value.race == state.race_id then
+			if value.race == state.race_id or (state.race_id == "pyr_npt_recently_selected" and pyr_npt_helper.tablecontains(state.recent_picks, value.id)) then
 				wesnoth.set_dialog_value((value.image or "") .."~SCALE(72,72)", "unit_list", index, "list_image")
 				wesnoth.set_dialog_value((value.name or "") .. "\n" .. (value.cost or "") .. _"Gold", "unit_list", index, "list_name")
 				current_unit_list[index] = index2

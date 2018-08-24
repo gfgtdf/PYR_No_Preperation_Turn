@@ -1,4 +1,40 @@
 --<<
+
+local global_vars = setmetatable({}, {
+	__index = function(self, namespace)
+		return setmetatable({}, {
+			__index = function(self, name)
+				wml.variables.lua_global_variable = nil
+				wesnoth.unsynced(function()
+					wesnoth.wml_actions.get_global_variable {
+						namespace = namespace,
+						to_local = "lua_global_variable",
+						from_global = name,
+						immediate = true,
+					}
+				end)
+				local res = wml.variables.lua_global_variable
+				wml.variables.lua_global_variable = nil
+				return res
+			end,
+			__newindex = function(self, name, val)
+				wml.variables.lua_global_variable = val
+				wesnoth.unsynced(function() 
+					wesnoth.wml_actions.set_global_variable {
+						namespace = namespace,
+						from_local = "lua_global_variable",
+						to_global = name,
+						immediate = true,
+					}
+				end)
+				wml.variables.lua_global_variable = nil
+			end,
+		})
+	end
+})
+
+local global_vars = global_vars.pyr_npt
+
 local _ = _textdomain_pyr_npt
 local V = helper.set_wml_var_metatable {}
 
@@ -43,9 +79,15 @@ function unit_selection_wrapper.let_player_choose_sides()
 		_ "recruit selection",
 		function(side)
 			if wesnoth.sides[side].controller == "human" then
+				local recent_picks = pyr_npt_helper.comma_to_list(global_vars.recent_picks)
 				while true do
-					local retv = pyr_npt_unit_selection.do_selection(side)
+					local retv = pyr_npt_unit_selection.do_selection(side, recent_picks)
 					if pyr_npt_unit_confirmation.confirm_recruitlist(retv) then
+						local new_recent_picks = pyr_npt_helper.deepcopy(retv)
+						for i = 1, math.min(20 - #new_recent_picks, #recent_picks) do
+							table.insert(new_recent_picks, recent_picks[i])
+						end
+						global_vars.recent_picks = table.concat(new_recent_picks, ",")
 						return { recruits = table.concat(retv, ",") }
 					end
 				end
